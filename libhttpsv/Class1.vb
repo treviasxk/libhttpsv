@@ -22,12 +22,6 @@ Public Class HTTPServer
     Private EndGetContext As HttpListenerContext = Nothing
     Private Paraments As New Dictionary(Of String, String)
 
-    Private Class Hostx
-        Public Sub Start()
-
-        End Sub
-    End Class
-
     Event ReceivedNewRequest As Eventos.ReceivedNewRequest
     Event ReceivedNewParameter As Eventos.ReceivedNewParameter
     Event ChangeStatusServer As Eventos.ChangeStatusServer
