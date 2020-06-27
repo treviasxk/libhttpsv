@@ -11,7 +11,7 @@ Imports System.Runtime.InteropServices
 ' Review the values of the assembly attributes
 
 <Assembly: AssemblyTitle("libhttpsv")> 
-<Assembly: AssemblyDescription("Essa extensão é utilizado para criar servidores http em redes locais.")> 
+<Assembly: AssemblyDescription("Essa extensão de aplicativo ele é utilizado para criar servidores http em redes locais.")> 
 <Assembly: AssemblyCompany("Nasky")> 
 <Assembly: AssemblyProduct("libhttpsv")> 
 <Assembly: AssemblyCopyright("Nasky ©  2020")> 
@@ -33,7 +33,7 @@ Imports System.Runtime.InteropServices
 ' by using the '*' as shown below:
 ' <Assembly: AssemblyVersion("1.0.*")> 
 
-<Assembly: AssemblyVersion("1.0.0.0")> 
-<Assembly: AssemblyFileVersion("1.0.0.0")> 
+<Assembly: AssemblyVersion("1.0.1.0")> 
+<Assembly: AssemblyFileVersion("1.0.1.0")> 
 
 <Assembly: NeutralResourcesLanguageAttribute("pt-BR")> 

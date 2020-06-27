@@ -3,6 +3,18 @@ Imports System.Text
 Imports System.Threading
 Imports System.Text.RegularExpressions
 
+Public Class Eventos
+    Delegate Sub ReceivedNewRequest(ByVal Request As HttpListenerRequest)
+    Delegate Sub ReceivedNewParameter(ByVal Key As String, Value As String)
+    Delegate Sub ChangeStatusServer(ByVal Status As StatusServer)
+End Class
+
+Public Enum StatusServer As Integer
+    ServerOff = 0
+    ServerOn = 1
+    ServerLoading = 2
+End Enum
+
 Public Class HTTPServer
     Private listener As New HttpListener
     Private tStatus As Integer
@@ -10,9 +22,15 @@ Public Class HTTPServer
     Private EndGetContext As HttpListenerContext = Nothing
     Private Paraments As New Dictionary(Of String, String)
 
-    Event ReceivedNewRequest()
-    Event ReceivedNewParameter(ByVal Key As String, Value As String)
-    Event ChangeStatusServer(ByVal e As StatusServer)
+    Private Class Hostx
+        Public Sub Start()
+
+        End Sub
+    End Class
+
+    Event ReceivedNewRequest As Eventos.ReceivedNewRequest
+    Event ReceivedNewParameter As Eventos.ReceivedNewParameter
+    Event ChangeStatusServer As Eventos.ChangeStatusServer
 
     ''' <summary>
     ''' No Context você pode adicionar códigos HTML, CSS e JavaScript.
@@ -25,7 +43,7 @@ Public Class HTTPServer
     ''' <summary>
     ''' Ao definir valor True nessa variável e caso seu software esteja sendo executado por aplicativo console, você verá todos os logs do HTTPServer.
     ''' </summary>
-    Public Property WriteConsole As Boolean
+    Public Property ProcessLogs As Boolean
         Get
             Return tshowconsole
         End Get
@@ -122,7 +140,7 @@ Public Class HTTPServer
             response.OutputStream.Write(buffer, 0, buffer.Length)
             response.Close()
         End If
-        RaiseEvent ReceivedNewRequest()
+        RaiseEvent ReceivedNewRequest(EndGetContext.Request)
         If Status = StatusServer.ServerOn Then
             listener.BeginGetContext(AddressOf RequestHandler, Interlocked.Increment(0))
         End If
@@ -135,9 +153,3 @@ Public Class HTTPServer
         End If
     End Sub
 End Class
-
-Public Enum StatusServer As Integer
-    ServerOff = 0
-    ServerOn = 1
-    ServerLoading = 2
-End Enum
