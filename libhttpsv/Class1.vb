@@ -1,7 +1,9 @@
 ﻿Imports System.Net
 Imports System.Text
+Imports System.IO
 Imports System.Threading
 Imports System.Text.RegularExpressions
+
 
 Public Class Eventos
     Delegate Sub ReceivedNewRequest(ByVal Request As HttpListenerRequest)
@@ -21,13 +23,28 @@ Public Class HTTPServer
     Private tshowconsole As Boolean
     Private EndGetContext As HttpListenerContext = Nothing
     Private Paraments As New Dictionary(Of String, String)
+    Private tContextFolder As String
+    Private Property ContextFiles As New List(Of String)
 
     Event ReceivedNewRequest As Eventos.ReceivedNewRequest
     Event ReceivedNewParameter As Eventos.ReceivedNewParameter
     Event ChangeStatusServer As Eventos.ChangeStatusServer
 
     ''' <summary>
-    ''' No Context você pode adicionar códigos HTML, CSS e JavaScript.
+    ''' No 'ContextFolder' você pode adicionar a localização de um directório, se existir o arquivo index.html ele será adicionado no Context para a localização raiz do dominio.
+    ''' </summary>
+    Public Property ContextFolder As String
+        Get
+            Return tContextFolder
+        End Get
+        Set(value As String)
+            ContextFiles.Clear()
+            ContextFiles.AddRange(Directory.GetFiles(value, "*.*", SearchOption.AllDirectories))
+            tContextFolder = value
+        End Set
+    End Property
+    ''' <summary>
+    ''' O 'Context' irá mostrar a página inicial do site, você pode adicionar códigos HTML, CSS e JavaScript, essa váriavel não vai funcionar se o 'ContextFolder' tiver um valor.
     ''' </summary>
     Public Property Context As String
     ''' <summary>
@@ -46,7 +63,7 @@ Public Class HTTPServer
         End Set
     End Property
     ''' <summary>
-    ''' Aqui você pode pegar os parâmetros de uma URL, por exemplo: no acesso http://localhost:8030/?download=ArquivoPDF, ao digitar GetParameter("download"), o valor 'ArquivoPDF' será retornado.
+    ''' Aqui você pode pegar os parâmetros de uma URL, por exemplo: no acesso http://127.0.0.1:8030/?download=ArquivoPDF, ao digitar GetParameter("download"), o valor 'ArquivoPDF' será retornado.
     ''' </summary>
     Public ReadOnly Property GetParameter(ByVal Key As String)
         Get
@@ -87,56 +104,104 @@ Public Class HTTPServer
     End Property
 
     ''' <summary>
-    ''' Ligar servidor HTTP em localhost com uma porta definido.
+    ''' HostStart irá ligar o servidor HTTP em um IP Local com uma porta definido.
     ''' </summary>
     Public Sub HostStart(ByVal Port As Integer)
-        CWrite("Iniciando servidor...")
-        tStatus = StatusServer.ServerLoading
-        RaiseEvent ChangeStatusServer(tStatus)
-        listener.Prefixes.Add("http://localhost:" & Port & "/")
-        listener.Start()
-        CWrite("Servidor iniciado com sucesso!")
-        tStatus = StatusServer.ServerOn
-        RaiseEvent ChangeStatusServer(tStatus)
-        listener.BeginGetContext(AddressOf RequestHandler, Interlocked.Increment(0))
+        If listener.IsListening Then
+            CWrite("O servidor já está ligado!")
+        Else
+            CWrite("Iniciando servidor...")
+            tStatus = StatusServer.ServerLoading
+            RaiseEvent ChangeStatusServer(tStatus)
+            Dim strHostName = System.Net.Dns.GetHostName()
+            Dim strIPAddress = System.Net.Dns.GetHostByName(strHostName).AddressList(0).ToString()
+            listener.Prefixes.Add("http://" & strIPAddress & ":" & Port & "/")
+            listener.Start()
+            CWrite("Servidor iniciado com sucesso em: http://" & strIPAddress & ":" & Port & "/")
+            tStatus = StatusServer.ServerOn
+            RaiseEvent ChangeStatusServer(tStatus)
+            listener.BeginGetContext(AddressOf RequestHandler, Interlocked.Increment(0))
+        End If
     End Sub
 
     ''' <summary>
-    ''' Desligar servidor HTTP.
+    ''' HostStop irá desligar o servidor HTTP.
     ''' </summary>
     Public Sub HostStop()
-        CWrite("Parando servidor...")
-        tStatus = StatusServer.ServerLoading
-        RaiseEvent ChangeStatusServer(tStatus)
-        listener.Stop()
-        listener.Abort()
-        CWrite("Servidor desligado com sucesso!")
-        tStatus = StatusServer.ServerOff
-        RaiseEvent ChangeStatusServer(tStatus)
+        If listener.IsListening Then
+            CWrite("Parando servidor...")
+            tStatus = StatusServer.ServerLoading
+            RaiseEvent ChangeStatusServer(tStatus)
+            listener.Stop()
+            listener.Abort()
+            CWrite("Servidor desligado com sucesso!")
+            tStatus = StatusServer.ServerOff
+            RaiseEvent ChangeStatusServer(tStatus)
+        Else
+            CWrite("O servidor já está parado!")
+        End If
     End Sub
 
     Private Sub RequestHandler(ByVal result As IAsyncResult)
-        EndGetContext = listener.EndGetContext(result)
-        CWrite("Nova acesso solicitado.   (URL: " & EndGetContext.Request.Url.ToString & ")")
-        Paraments.Clear()
-        Dim matches As MatchCollection = Regex.Matches(EndGetContext.Request.RawUrl, "(\?|\&)([^=]+)\=([^&]+)")
-        For Each m As Match In matches
-            If Not Paraments.ContainsKey(m.Groups(2).Value) Then
-                CWrite("Novo parâmetro recebido.  (KEY: " & m.Groups(2).Value & ", VALUE: " & m.Groups(3).Value & ")")
-                Paraments.Add(m.Groups(2).Value, m.Groups(3).Value)
-                RaiseEvent ReceivedNewParameter(m.Groups(2).Value, m.Groups(3).Value)
-            End If
-        Next
+        Try
+            EndGetContext = listener.EndGetContext(result)
+            CWrite("Nova acesso solicitado.   (URL: " & EndGetContext.Request.Url.ToString & ")")
+            Paraments.Clear()
 
-        If Not Context = Nothing Then
-            Dim response As HttpListenerResponse = EndGetContext.Response
-            Dim buffer() As Byte = ContextEncoding.GetBytes(Context)
-            response.OutputStream.Write(buffer, 0, buffer.Length)
-            response.Close()
-        End If
-        RaiseEvent ReceivedNewRequest(EndGetContext.Request)
-        If Status = StatusServer.ServerOn Then
-            listener.BeginGetContext(AddressOf RequestHandler, Interlocked.Increment(0))
+            Dim matches As MatchCollection = Regex.Matches(EndGetContext.Request.RawUrl, "(\?|\&)([^=]+)\=([^&]+)")
+            For Each m As Match In matches
+                If Not Paraments.ContainsKey(m.Groups(2).Value) Then
+                    CWrite("Novo parâmetro recebido.  (KEY: " & m.Groups(2).Value & ", VALUE: " & m.Groups(3).Value & ")")
+                    Paraments.Add(m.Groups(2).Value, m.Groups(3).Value)
+                    RaiseEvent ReceivedNewParameter(m.Groups(2).Value, m.Groups(3).Value)
+                End If
+            Next
+
+            Dim t As New Thread(Sub() Connection())
+            t.Start()
+
+            RaiseEvent ReceivedNewRequest(EndGetContext.Request)
+            If Status = StatusServer.ServerOn Then
+                listener.BeginGetContext(AddressOf RequestHandler, Interlocked.Increment(0))
+            End If
+        Catch ex As Exception
+
+        End Try
+    End Sub
+
+    Private Sub Connection()
+        If Directory.Exists(ContextFolder) Then
+            If File.Exists(ContextFolder + "\index.html") And Request.Url.AbsolutePath = "/" Then
+                Dim buffer() As Byte = ContextEncoding.GetBytes(File.ReadAllText(ContextFolder + "\index.html"))
+                Response.OutputStream.Write(buffer, 0, buffer.Length)
+                Response.Close()
+            Else
+                Context = Nothing
+                Dim url As New Uri(ContextFolder + Request.Url.AbsolutePath)
+                If File.Exists(url.LocalPath) Then
+                    Try
+                        Dim FileStream = File.OpenRead(url.LocalPath)
+                        EndGetContext.Response.ContentLength64 = FileStream.Length
+                        FileStream.CopyTo(Response.OutputStream)
+                        Response.Close()
+                    Catch ex As Exception
+
+                    End Try
+                Else
+                    For i As Integer = 0 To ContextFiles.Count - 1
+                        Context += "<a href='" & ContextFiles(i).Replace(ContextFolder, "") & "'>" & ContextFiles(i).Replace(ContextFolder, "") & "</a></br>"
+                    Next i
+                    Dim buffer() As Byte = ContextEncoding.GetBytes(Context)
+                    Response.OutputStream.Write(buffer, 0, buffer.Length)
+                    Response.Close()
+                End If
+            End If
+        Else
+            If Not Context = Nothing Then
+                Dim buffer() As Byte = ContextEncoding.GetBytes(Context)
+                Response.OutputStream.Write(buffer, 0, buffer.Length)
+                Response.Close()
+            End If
         End If
     End Sub
 
