@@ -5,7 +5,7 @@ Primeiro baixe a dll ou o projeto que estiver mais atualizado na página de lan�
 ***
 ## DOCUMENTAÇÃO
 ### AÇÕES
-* HostStart(Integer) - HostStart irá ligar o servidor HTTP em um IP e Porta definido na sua rede local.
+* HostStart(Integer, IP) - HostStart irá ligar o servidor HTTP em um IP e Porta definido na sua rede local.
 * HostStop() - HostStop irá desligar o servidor HTTP.
 ### EVENTOS
 * ReceivedNewRequest(HttpListenerRequest) - A cada acesso solicitado pelo o usuário no localhost.

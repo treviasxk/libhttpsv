@@ -1,7 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <Version>1.0.4.0</Version>
+    <AssemblyVersion>1.0.4.0</AssemblyVersion>
+    <FileVersion>1.0.4.0</FileVersion>
+    <Company>Trevias Xk</Company>
+    <Authors>Trevias Xk</Authors>
+    <Product>Libhttpsv</Product>
+    <Description>Esse projeto é uma extensão de aplicativo para Windows, ele é utilizado para criar servidor http em redes locais com maior facilidade.</Description>
+    <Copyright>Trevias Xk © 2021</Copyright>
   </PropertyGroup>
-
 </Project>

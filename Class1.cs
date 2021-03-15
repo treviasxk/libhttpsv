@@ -117,7 +117,7 @@ namespace libhttpsv{
         }
 
         /// <summary>
-        /// HostStop irá desligar o servidor HTTP.
+        /// HostStop irá desligar o servidor HTTP, porém comando só irá funcionar se o servidor estiver inicializado por completo.
         /// </summary>
         public void HostStop(){
             if (listener.IsListening){
