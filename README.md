@@ -1,17 +1,18 @@
 # Libhttpsv
-Libhttpsv é uma extensão de aplicativo (.dll) para windows, com projeto open-source no GitHub e programado na linguagem VB.NET, com ele o usuário poderá implementar um servidor localhost em seu software de windows, essa extensão é perfeito para criar controle remoto e trocar informações através apenas de conexões http.
+Libhttpsv é uma extensão de aplicativo (.dll) para windows, com projeto open-source no GitHub e programado na linguagem C#, com ele o usuário poderá implementar um servidor localhost em seu software de windows, essa extensão é perfeito para criar controle remoto e trocar informações através apenas de conexões http.
 ### Como utilizar em seu software
-Primeiro baixe a dll que estiver mais atualizado na página de lançamentos do libhttpsv no GitHub.  https://github.com/treviasxk/HTTPServer/releases, depois adiciona a DLL como referência no seu projeto do Visual Studio.
+Primeiro baixe a dll ou o projeto que estiver mais atualizado na página de lançamentos do libhttpsv no GitHub. https://github.com/treviasxk/libhttpsv/releases, depois adiciona como referência no seu projeto.
 ***
 ## DOCUMENTAÇÃO
 ### AÇÕES
-* HostStart(Integer) - HostStart irá ligar o servidor HTTP em um IP Local com uma porta definido.
+* HostStart(Integer) - HostStart irá ligar o servidor HTTP em um IP e Porta definido na sua rede local.
 * HostStop() - HostStop irá desligar o servidor HTTP.
 ### EVENTOS
 * ReceivedNewRequest(HttpListenerRequest) - A cada acesso solicitado pelo o usuário no localhost.
 * ReceivedNewParameter(String, String) - A cada acesso solicitado com uma request no dominio do localhost (exemplo: localhost:8030/?page=download).
 * ChangeStatusServer(StatusServer) - Sempre que o servidor for ligado ou desligado.
 ### VARIÁVEIS
+* ConsoleLock - Ao definir valor True, o console não será finalizado ao término do código.
 * Context - No Context você pode adicionar códigos HTML, CSS e JavaScript.
 * ContextEncoding - O ContextEncoding irá codificar a String definido na variável Context, se não definir um encoding, por padrão a codificação será UTF8.
 * ContextFolder - No 'ContextFolder' você pode adicionar a localização de um directório, se existir o arquivo index.html ele será adicionado no Context para a localização raiz do dominio.
