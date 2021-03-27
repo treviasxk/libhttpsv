@@ -117,6 +117,16 @@ namespace libhttpsv{
         }
 
         /// <summary>
+        /// HostRestart irá reiniciar o servidor HTTP, é recomendado utilizar esse comando caso o servidor falhe. (Beta)
+        /// </summary>
+
+        public void HostRestart(){
+            CWrite("Reiniciando servidor...");
+            HostStop();
+            HostStart();
+        }
+
+        /// <summary>
         /// HostStop irá desligar o servidor HTTP, porém comando só irá funcionar se o servidor estiver inicializado por completo.
         /// </summary>
         public void HostStop(){
