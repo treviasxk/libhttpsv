@@ -121,9 +121,8 @@ namespace libhttpsv{
         /// </summary>
 
         public void HostRestart(){
-            CWrite("Reiniciando servidor...");
-            HostStop();
-            HostStart();
+            //CWrite("Reiniciando servidor...");
+            //HostStop();
         }
 
         /// <summary>
